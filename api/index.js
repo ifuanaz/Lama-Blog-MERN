@@ -3,6 +3,8 @@ const app = express();
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const multer = require('multer');
+const cors = require('cors');
+const path = require('path');
 
 // Routes
 const authRoute = require('./routes/auth');
@@ -12,14 +14,21 @@ const categoryRoute = require('./routes/category');
 
 dotenv.config();
 app.use(express.json());
+app.use('/images', express.static(path.join(__dirname, '/images')));
+app.use(cors({
+    origin: 'http://localhost:3000'
+}));
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'images');
+        if (req.body.directory) {
+            cb(null, req.body.directory);
+        } else {
+            cb(null, 'images');
+        }
     },
     filename: (req, file, cb) => {
-        cb(null, 'hye.png');
-        // req.body.name
+        cb(null, req.body.name);
     }
 });
 

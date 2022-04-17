@@ -1,25 +1,74 @@
+import { useContext, useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Context } from '../../context/Context';
+import http from '../../utils/axios';
 import './postDetails.css'
 
 export default function PostDetails() {
-  return (
-    <div className='postDetails'>
-        <div className="postDetailsWrapper">
-            <img className='postDetailsImage' src="https://www.industrialempathy.com/img/remote/ZiClJf-1920w.jpg" alt="" />
-            <h1 className='postDetailsTitle'>
-                Lorem, ipsum dolor.
-                <span className='postDetailsEdit'>
-                    <i className="postDetailsIcon fa-solid fa-pen-to-square"></i>
-                    <i className="postDetailsIcon fa-solid fa-trash-can"></i>
-                </span>
-            </h1>
-            <div className="postDetailsInfo">
-                <span className='postDetailsAuthor'>Author: <b>Rafik</b></span>
-                <span className='postDetailsDate'>1 hour ago</span>
+    const publicFolder = 'http://localhost:5000/images/';
+    const [post, setPost] = useState({});
+    const { postId } = useParams();
+    const { user } = useContext(Context);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        const fetchPost = async () => {
+            const response = await http.get(`/post/${postId}`);
+
+            setPost(response.data);
+        }
+        fetchPost();
+    }, []);
+
+    const onDeletePost = async () => {
+        const isConfirmed = window.confirm('Are you sure you want to delete this post?');
+
+        if (isConfirmed) {
+            await http.delete(`/post/${postId}`, {
+                data: { author: user.username }
+            });
+            navigate('/');
+        }
+    }
+
+    return (
+        <div className='postDetails'>
+            <div className="postDetailsWrapper">
+                {post.image ?
+                    <img className='postDetailsImage'
+                        src={publicFolder + post.image}
+                        alt="image"
+                    />
+                    :
+                    <img className='postDetailsImage'
+                        src="/images/image-not-available.jpg"
+                        alt="image"
+                    />
+                }
+                <h1 className='postDetailsTitle'>
+                    {post.title}
+                    {post.author === user.username &&
+                        <span className='postDetailsEdit'>
+                            <Link to={`/edit/${post._id}`}>
+                                <i className="postDetailsIcon edit fa-solid fa-pen-to-square"></i>
+                            </Link>
+                            <i className="postDetailsIcon delete fa-solid fa-trash-can" onClick={onDeletePost}></i>
+                        </span>
+                    }
+                </h1>
+                <div className="postDetailsInfo">
+                    <span className='postDetailsAuthor'>
+                        Author:
+                        <Link to={`/?author=${post.author}`}>
+                            <b>{post.author}</b>
+                        </Link>
+                    </span>
+                    <span className='postDetailsDate'>1 hour ago</span>
+                </div>
+                <p className='postDetailsText'>
+                    {post.description}
+                </p>
             </div>
-            <p className='postDetailsText'>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Tenetur labore veritatis quas, tempore nobis expedita ipsam. Quasi, animi ab ullam quis porro tempore ducimus iusto quam commodi neque beatae architecto sequi repellat ad aperiam qui sint exercitationem dolorem ut corporis debitis cumque modi quos eos? Possimus amet beatae distinctio esse inventore minima ipsam vero eaque vel error, explicabo nobis architecto dolore odio magni quis aliquid soluta culpa voluptas iusto est ad fugit dicta assumenda! Ipsa quaerat at repudiandae aperiam aliquid aliquam nam delectus ad, blanditiis amet quam cupiditate excepturi quidem adipisci porro numquam assumenda laudantium, dignissimos eligendi vitae est quia accusamus. Animi ullam a saepe officia quas sunt, excepturi et veritatis odio cupiditate hic tenetur porro. Assumenda quod, mollitia doloremque autem similique praesentium deleniti impedit eum nisi labore eaque deserunt veniam. Suscipit ut repellendus laboriosam consequuntur, adipisci, illum ex iure rem totam officiis tenetur, numquam ipsum labore obcaecati laudantium reprehenderit earum maiores rerum nobis veniam! Enim porro eos, accusantium velit impedit vero neque corporis quas a magni rerum consequuntur harum beatae odit. In inventore ipsam et adipisci fuga reprehenderit exercitationem neque perferendis, veniam dolorum odio! Facere sed blanditiis alias, minus, quae quod aperiam at recusandae debitis assumenda porro, eos labore.
-            </p>
         </div>
-    </div>
-  )
+    )
 }

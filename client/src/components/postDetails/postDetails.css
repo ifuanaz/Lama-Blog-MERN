@@ -9,7 +9,7 @@
 
 .postDetailsImage {
     width: 100%;
-    height: 300px;
+    height: 380px;
     border-radius: 5px;
     object-fit: cover;
 }
@@ -31,11 +31,11 @@
     cursor: pointer;
 }
 
-.postDetailsIcon:first-child {
+.postDetailsIcon.edit {
     color: teal;
 }
 
-.postDetailsIcon:last-child {
+.postDetailsIcon.delete {
     color: tomato;
 }
 

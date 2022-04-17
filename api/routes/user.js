@@ -10,9 +10,9 @@ router.get('/:id', async (req, res) => {
         const user = await User.findById(req.params.id);
         if (!user) res.status(404).json('User not found.');
 
-        const {password, ...other} = user._doc;
+        const { password, ...other } = user._doc;
         res.status(200).json(other);
-    } catch(error) {
+    } catch (error) {
         res.status(500).json(error);
     }
 });
@@ -26,12 +26,15 @@ router.put('/:id', async (req, res) => {
             req.body.password = hash;
         }
         try {
+            const { username, ...body } = req.body;
             const updatedUser = await User.findByIdAndUpdate(req.params.id, {
-                $set: req.body
+                $set: body
             }, { new: true });
 
-            res.status(200).json(updatedUser);
-        } catch(error) {
+            const { password, ...response } = updatedUser._doc;
+
+            res.status(200).json(response);
+        } catch (error) {
             res.status(500).json(error);
         }
     } else {
@@ -49,8 +52,8 @@ router.delete('/:id', async (req, res) => {
             await Post.deleteMany({ author: user.username });
             await User.findByIdAndDelete(req.params.id);
             res.status(200).json('User has been deleted...');
-    
-        } catch(error) {
+
+        } catch (error) {
             res.status(500).json(error);
         }
     } else {

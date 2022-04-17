@@ -1,40 +1,38 @@
+import { Link } from 'react-router-dom'
 import './post.css'
 
-export default function Post() {
-  return (
-    <article className='post'>
-        <img className='postImage' src="https://thumbs.dreamstime.com/b/santa-hat-new-year-s-soft-toy-bench-winter-forest-against-background-village-house-lantern-christma-christmas-156787504.jpg" alt="" />
-        <div className="postInfo">
-            <div className="postCategories">
-                <span className="postCategory">Music</span>
-                <span className="postCategory">Life</span>
-            </div>
-            <h2 className='postTitle'>
-                Abole, provident quite.
-            </h2>
-            <hr />
-            <span className="postDate">
-                1 hour ago
-            </span>
-        </div>
-        <p className='postText'>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-            Tenetur velit facilis iure. 
-            Quo quos dignissimos, sequi minima maxime ipsum totam!
+export default function Post({ post }) {
+    const publicFolder = 'http://localhost:5000/images/';
 
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. 
-            Numquam rerum deserunt nobis mollitia deleniti vitae cum consequatur 
-            fuga assumenda error aut magni sed, temporibus non illo incidunt. 
-            Nam dignissimos porro maiores, deleniti a laborum tempore ipsa sint, 
-            fuga itaque eveniet repellendus doloribus iure consequuntur nobis 
-            doloremque ut voluptatibus commodi temporibus?
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. 
-            Numquam rerum deserunt nobis mollitia deleniti vitae cum consequatur 
-            fuga assumenda error aut magni sed, temporibus non illo incidunt. 
-            Nam dignissimos porro maiores, deleniti a laborum tempore ipsa sint, 
-            fuga itaque eveniet repellendus doloribus iure consequuntur nobis 
-            doloremque ut voluptatibus commodi temporibus?
-        </p>
-    </article>
-  )
+    return (
+        <article className='post'>
+            {post.image ?
+                <img className='postImage' src={publicFolder + post.image} alt="image" />
+                :
+                <img className='postImage' src="/images/image-not-available.jpg" alt="image" />
+            }
+            <div className="postInfo">
+                <div className="postCategories">
+                    {post.categories.map((category, index) => (
+                        // Category should be as an object
+                        <span className="postCategory" key={index}>
+                            {category}
+                        </span>
+                    ))}
+                </div>
+                <h2 className='postTitle'>
+                    <Link to={`/post/${post._id}`}>
+                        {post.title}
+                    </Link>
+                </h2>
+                <hr />
+                <span className="postDate">
+                    {new Date(post.createdAt).toDateString()}
+                </span>
+            </div>
+            <p className='postText'>
+                {post.description}
+            </p>
+        </article>
+    )
 }

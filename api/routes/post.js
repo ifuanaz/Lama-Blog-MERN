@@ -29,7 +29,7 @@ router.get('/', async (req, res) => {
             posts = await Post.find();
         }
 
-        res.status(200).json(posts);
+        res.status(200).json(posts.reverse());
     } catch(error) {
         res.status(500).json(error);
     }
@@ -71,7 +71,7 @@ router.delete('/:id', async (req, res) => {
     try {
         const post = await Post.findById(req.params.id);
 
-        if (!post) res.status(404).json('Post not found.');
+        if (!post) return res.status(404).json('Post not found.');
 
         if (post.author === req.body?.author) {
             await post.delete();

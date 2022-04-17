@@ -1,15 +1,31 @@
-import './create.css'
+import './edit.css'
+import React, { useContext, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useContext, useState } from 'react';
-import { Context } from '../../context/Context';
 import http from '../../utils/axios';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Context } from '../../context/Context';
 
-export default function Create() {
-    const { register, handleSubmit, setValue, formState: { errors } } = useForm();
-    const { user } = useContext(Context);
+export default function Edit() {
+    const publicFolder = 'http://localhost:5000/images/';
     const navigate = useNavigate();
+    const { postId } = useParams();
+    const [post, setPost] = useState('');
     const [filePreview, setFilePreview] = useState('');
+    const { user } = useContext(Context);
+    const { register, setValue, handleSubmit, formState: { errors } } = useForm();
+
+    useEffect(() => {
+        const fetchPost = async () => {
+            const response = await http.get(`/post/${postId}`);
+            const post = response.data;
+
+            setPost(post);
+            setValue('title', post.title);
+            setValue('description', post.description);
+        }
+
+        fetchPost();
+    }, []);
 
     const onSelectFile = (event) => {
         const file = event.target.files[0];
@@ -19,12 +35,13 @@ export default function Create() {
     }
 
     const onSubmit = async (formData) => {
-        // console.log(formData);
+        console.log('SUBMIT / EDIT', formData);
+        console.log(formData.file);
+
         const body = {
             title: formData.title,
             description: formData.description,
-            author: user.username,
-            categories: []
+            author: user.username
         };
 
         if (formData.file?.size) {
@@ -44,20 +61,21 @@ export default function Create() {
             }
         }
 
-        const response = await http.post('/post', body);
-        navigate(`/post/${response.data._id}`);
+        await http.put(`/post/${postId}`, body);
+        navigate(`/post/${postId}`);
     }
 
     return (
-        <div className='create'>
-            {
-                filePreview &&
+        <div className='edit'>
+            {filePreview ?
                 <img className='createImage' src={URL.createObjectURL(filePreview)} alt="Image" />
+                :
+                post.image && <img className='editImage' src={publicFolder + post.image} alt="Image" />
             }
-            <form className='createForm' onSubmit={handleSubmit(onSubmit)}>
-                <div className="createFormGroup">
+            <form className='editForm' onSubmit={handleSubmit(onSubmit)}>
+                <div className="editFormGroup">
                     <label htmlFor="fileInput">
-                        <i className="createIcon fa-solid fa-arrow-up-from-bracket"></i>
+                        <i className="editIcon fa-solid fa-arrow-up-from-bracket"></i>
                     </label>
                     <input type="file" id='fileInput'
                         style={{ display: 'none' }}
@@ -65,26 +83,26 @@ export default function Create() {
                         onChange={onSelectFile}
                     />
                     <input type="text" placeholder='Title'
-                        className='createInput' autoFocus={true}
+                        className='editInput' autoFocus={true}
                         {...register('title', { required: true, minLength: 5 })}
                     />
                 </div>
-                <div className='createFormGroup error'>
+                <div className='editFormGroup error'>
                     {errors.title?.type === 'required' && <span>This field is required</span>}
                     {errors.title?.type === 'minLength' && <span>This field should be more than 4 symbols</span>}
                 </div>
-                <div className="createFormGroup">
+                <div className="editFormGroup">
                     <textarea
-                        className='createInput createText'
+                        className='editInput editText'
                         placeholder='Tell your story...'
-                        rows={10}
+                        rows={12}
                         {...register('description', { required: true })}
                     ></textarea>
                 </div>
-                <div className='createFormGroup error'>
+                <div className='editFormGroup error'>
                     {errors.description?.type === 'required' && <span>This field is required</span>}
                 </div>
-                <button className='createSubmit' type='submit'>Publish</button>
+                <button className='editSubmit' type='submit'>Update</button>
             </form>
         </div>
     )
